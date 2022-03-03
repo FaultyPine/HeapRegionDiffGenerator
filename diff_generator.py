@@ -199,6 +199,15 @@ def dump_and_parse(memdump_dir, base_memdump_filepath, dump_num):
 heap_regions_dic = {}
 
 def main():
+    # dump0
+    initial_dump = MEMDUMP_DIR_BASE + "/dump0/"
+    if not os.path.exists(initial_dump + "mem1_0.txt") or not os.path.exists(initial_dump + "mem2_0.txt"):
+        print("Hexdumping initial dump...")
+        mem1_cmd = "hexdump " + (initial_dump + "mem1_0.raw") + " > " + (initial_dump + "mem1_0.txt")
+        os.system(mem1_cmd)
+        mem2_cmd = "hexdump " + (initial_dump + "mem2_0.raw") + " > " + (initial_dump + "mem2_0.txt")
+        os.system(mem2_cmd)
+    
     
     # iterate through folders in memdumps folder and hexdump/diff them all    
     dump_num = 1
