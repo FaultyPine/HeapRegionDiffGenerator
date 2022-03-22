@@ -14,7 +14,11 @@ import sys, os, subprocess, argparse, difflib, atexit
 
 
 # -----------------------------------
-MEMDUMP_DIR_BASE = "C:/Users/gclar/Desktop/dolphin/Binary/x64/User/Dump/memdumps"
+if (len(sys.argv) < 2):
+    print("Missing memdump directory argument. The cmd should look something like: diff_generator.py C:/PATH_TO_MEMDUMPS/memdumps")
+    quit()
+MEMDUMP_DIR_BASE = sys.argv[1]
+print("Memdump directory: " + MEMDUMP_DIR_BASE)
 # -----------------------------------
 
 CHANGED_ADDRS_FILENAME = "changed_addrs.txt"
@@ -140,8 +144,8 @@ def parse_mem_differences(memdump_dir, base_memdump_filepath, dump_num):
         return
 
     # base files. These are the files that all memdumps get compared to - they are the first memdump out of however many were dumped during a match
-    mem1_first = base_memdump_filepath + "/mem1_0"
-    mem2_first = base_memdump_filepath + "/mem2_0"
+    mem1_first = base_memdump_filepath + "/mem1_" + str(dump_num-1)
+    mem2_first = base_memdump_filepath + "/mem2_" + str(dump_num-1)
 
     # these are the current iteration of the parsing loop. Compare these against the base files
     mem1_second = memdump_dir + "/mem1_" + str(dump_num) # no extension -- memdumps/dumpX/mem1_X
@@ -200,19 +204,19 @@ heap_regions_dic = {}
 
 def main():
     # dump0
-    initial_dump = MEMDUMP_DIR_BASE + "/dump0/"
-    if not os.path.exists(initial_dump + "mem1_0.txt") or not os.path.exists(initial_dump + "mem2_0.txt"):
+    initial_dump = MEMDUMP_DIR_BASE + "/dump0"
+    if not os.path.exists(initial_dump + "/mem1_0.txt") or not os.path.exists(initial_dump + "/mem2_0.txt"):
         print("Hexdumping initial dump...")
-        mem1_cmd = "hexdump " + (initial_dump + "mem1_0.raw") + " > " + (initial_dump + "mem1_0.txt")
+        mem1_cmd = "hexdump " + (initial_dump + "/mem1_0.raw") + " > " + (initial_dump + "/mem1_0.txt")
         os.system(mem1_cmd)
-        mem2_cmd = "hexdump " + (initial_dump + "mem2_0.raw") + " > " + (initial_dump + "mem2_0.txt")
+        mem2_cmd = "hexdump " + (initial_dump + "/mem2_0.raw") + " > " + (initial_dump + "/mem2_0.txt")
         os.system(mem2_cmd)
     
     
     # iterate through folders in memdumps folder and hexdump/diff them all    
     dump_num = 1
     memdump_dir = MEMDUMP_DIR_BASE + "/dump" + str(dump_num)
-    base_memdump_filepath = MEMDUMP_DIR_BASE + "/dump0" # used for comparison with the other dumps
+    base_memdump_filepath = initial_dump
     while os.path.exists(memdump_dir):
         print("Dump #" + str(dump_num))
         dump_and_parse(memdump_dir, base_memdump_filepath, dump_num)
@@ -226,6 +230,7 @@ def main():
 
 
         dump_num += 1
+        base_memdump_filepath = memdump_dir # set base to previous ( diffs the current mem dump with the previous )
         memdump_dir = MEMDUMP_DIR_BASE + "/dump" + str(dump_num)
 
     
@@ -233,7 +238,7 @@ def main():
 
 
 def sort_and_write_heap_regions():
-    
+    print("Writing heap regions to file...")
     for v in heap_regions_dic.values():
         v.sort(key=lambda heap_info: heap_info[0]) # sort addresses
 
@@ -248,7 +253,7 @@ def sort_and_write_heap_regions():
             output_str = f"{{ {str(start_addr)}, {str(end_addr)}, nullptr, \"{heap_name}\" }},\n"
             heap_regions_output.write(output_str)
         heap_regions_output.write("\n\n")
-    print("Wrote heap regions to file")
+    print("Wrote heap regions to file! See" + HEAP_REGIONS_OUTPUT_FILENAME)
     
 # when program exists, sort & write heap regions output to file
 # doing this on program exit so that you can cancel the process early and not lose progress
