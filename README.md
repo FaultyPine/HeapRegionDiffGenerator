@@ -1,3 +1,4 @@
+### diff_generator.py
 A python script that takes in memory dumps from the dolphin emulator, parses differences in the binary files, and gives the user
 a list of changed addresses sorted by "heap region" (see heap_regions.txt)  
   
@@ -38,3 +39,31 @@ An example output of this script might look like:
 ```
 
 (... means truncated text)
+
+### unchanged_regions.py
+
+Script to output regions of memory that are unchanged across all memory dump frames
+
+sample output:
+
+```
+MEM1 Unchanged Regions-------:
+
+0x80c23a46 size: 4428698
+0x807824d8 size: 4205107
+0x812dde12 size: 2339067
+0x810602be size: 2078074
+0x806729bc size: 1112859
+0x81734830 size: 833488
+
+MEM2 Unchanged Regions-------:
+
+0x91b67654 size: 20761996
+0x935f0b39 size: 10548423
+0x90432344 size: 10185604
+0x91546347 size: 6345997
+0x92fca410 size: 6343988
+0x90ff5196 size: 3197552
+0x9134c9d8 size: 1988791
+0x90e6f7b0 size: 1500261
+```
